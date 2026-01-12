@@ -34,6 +34,9 @@ async function startServer() {
   const app = express();
   const server = createServer(app);
 
+  // Railwayなどのリバースプロキシを信頼（X-Forwarded-Protoなどを正しく認識）
+  app.set('trust proxy', 1);
+
   // CORS設定（Vercelフロントエンドからのリクエストを許可）
   const allowedOrigins = [
     "https://crewai-japan.vercel.app",

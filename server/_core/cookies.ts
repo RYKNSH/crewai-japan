@@ -39,10 +39,12 @@ export function getSessionCookieOptions(
   //       ? hostname
   //       : undefined;
 
+  // 本番環境では必ずsecure:trueを設定（Railway等のリバースプロキシ考慮）
+  const isProduction = process.env.NODE_ENV === "production";
   return {
     httpOnly: true,
     path: "/",
-    sameSite: "none",
-    secure: isSecureRequest(req),
+    sameSite: "none" as const,
+    secure: isProduction || isSecureRequest(req),
   };
 }
