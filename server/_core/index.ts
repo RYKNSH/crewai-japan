@@ -1,5 +1,6 @@
 import "dotenv/config";
 import express from "express";
+import cors from "cors";
 import { createServer } from "http";
 import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
@@ -32,6 +33,26 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 async function startServer() {
   const app = express();
   const server = createServer(app);
+
+  // CORS設定（Vercelフロントエンドからのリクエストを許可）
+  const allowedOrigins = [
+    "https://crewai-japan.vercel.app",
+    "http://localhost:3000",
+    "http://localhost:5173",
+  ];
+
+  app.use(cors({
+    origin: (origin, callback) => {
+      // 開発時やサーバー間通信はoriginがundefinedになる場合がある
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(null, false);
+      }
+    },
+    credentials: true, // クッキーの送受信を許可
+  }));
+
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
