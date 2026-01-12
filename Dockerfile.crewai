@@ -1,0 +1,30 @@
+# CrewAI Python実行環境用Dockerfile
+# Python 3.11 + CrewAI 1.8.0 + 必要な依存パッケージ
+
+FROM python:3.11-slim
+
+# 作業ディレクトリを設定
+WORKDIR /app
+
+# システムパッケージの更新とビルドツールのインストール
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    make \
+    && rm -rf /var/lib/apt/lists/*
+
+# Pythonパッケージのインストール
+RUN pip install --no-cache-dir \
+    crewai==1.8.0 \
+    langchain-openai \
+    pydantic \
+    python-dotenv
+
+# 標準入力からJSONを受け取り、CrewAIを実行するスクリプトをコピー
+COPY python/crewai_engine.py /app/crewai_engine.py
+
+# 実行権限を付与
+RUN chmod +x /app/crewai_engine.py
+
+# 標準入力から入力を受け取り、標準出力に結果を出力
+CMD ["python", "/app/crewai_engine.py"]

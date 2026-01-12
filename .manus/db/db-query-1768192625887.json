@@ -1,0 +1,9 @@
+{
+  "query": "UPDATE executions SET status = 'failed', error = 'Execution timed out or was interrupted', completedAt = NOW() WHERE status = 'pending';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 46y1ZEj3hoGatmA.143cc7aacaa5 --database KyAyR9wgTdyHZynPQKBX53 --execute UPDATE executions SET status = 'failed', error = 'Execution timed out or was interrupted', completedAt = NOW() WHERE status = 'pending';",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1523
+}

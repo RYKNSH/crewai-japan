@@ -1,0 +1,45 @@
+{
+  "query": "SELECT id, status, createdAt FROM executions WHERE status = 'pending' ORDER BY id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 46y1ZEj3hoGatmA.143cc7aacaa5 --database KyAyR9wgTdyHZynPQKBX53 --execute SELECT id, status, createdAt FROM executions WHERE status = 'pending' ORDER BY id;",
+  "rows": [
+    {
+      "id": "1",
+      "status": "pending",
+      "createdAt": "2026-01-12 03:38:15"
+    },
+    {
+      "id": "3",
+      "status": "pending",
+      "createdAt": "2026-01-12 03:38:33"
+    },
+    {
+      "id": "5",
+      "status": "pending",
+      "createdAt": "2026-01-12 03:47:11"
+    },
+    {
+      "id": "7",
+      "status": "pending",
+      "createdAt": "2026-01-12 03:47:28"
+    },
+    {
+      "id": "9",
+      "status": "pending",
+      "createdAt": "2026-01-12 03:52:39"
+    },
+    {
+      "id": "11",
+      "status": "pending",
+      "createdAt": "2026-01-12 03:56:42"
+    },
+    {
+      "id": "13",
+      "status": "pending",
+      "createdAt": "2026-01-12 03:56:54"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tstatus\tcreatedAt\n1\tpending\t2026-01-12 03:38:15\n3\tpending\t2026-01-12 03:38:33\n5\tpending\t2026-01-12 03:47:11\n7\tpending\t2026-01-12 03:47:28\n9\tpending\t2026-01-12 03:52:39\n11\tpending\t2026-01-12 03:56:42\n13\tpending\t2026-01-12 03:56:54\n",
+  "stderr": "",
+  "execution_time_ms": 1543
+}
