@@ -65,9 +65,11 @@ export default function DashboardLayout({
   if (!user) {
     const handleDevLogin = async () => {
       try {
-        const response = await fetch('/api/dev-login', {
+        const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "";
+        const response = await fetch(`${apiBaseUrl}/api/dev-login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
           body: JSON.stringify({
             email: 'admin@crewai.jp',
             name: 'Admin User'

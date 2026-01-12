@@ -37,10 +37,13 @@ queryClient.getMutationCache().subscribe(event => {
   }
 });
 
+// APIベースURLを環境変数から取得（本番はRailway、開発はローカル）
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
+
 const trpcClient = trpc.createClient({
   links: [
     httpBatchLink({
-      url: "/api/trpc",
+      url: `${API_BASE_URL}/api/trpc`,
       transformer: superjson,
       fetch(input, init) {
         return globalThis.fetch(input, {
