@@ -4,10 +4,15 @@
     "outputDirectory": "dist/public",
     "installCommand": "npm install -g pnpm && pnpm install",
     "framework": null,
+    "functions": {
+        "api/index.ts": {
+            "runtime": "@vercel/node@3.2.30"
+        }
+    },
     "rewrites": [
         {
-            "source": "/api/(.*)",
-            "destination": "/api/$1"
+            "source": "/api/:path*",
+            "destination": "/api"
         }
     ],
     "headers": [
