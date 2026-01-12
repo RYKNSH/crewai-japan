@@ -63,6 +63,26 @@ export default function DashboardLayout({
   }
 
   if (!user) {
+    const handleDevLogin = async () => {
+      try {
+        const response = await fetch('/api/dev-login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: 'admin@crewai.jp',
+            name: 'Admin User'
+          }),
+        });
+        if (response.ok) {
+          window.location.reload();
+        } else {
+          console.error('Login failed');
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+      }
+    };
+
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="flex flex-col items-center gap-8 p-8 max-w-md w-full">
@@ -75,9 +95,7 @@ export default function DashboardLayout({
             </p>
           </div>
           <Button
-            onClick={() => {
-              window.location.href = getLoginUrl();
-            }}
+            onClick={handleDevLogin}
             size="lg"
             className="w-full shadow-lg hover:shadow-xl transition-all"
           >
