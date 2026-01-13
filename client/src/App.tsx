@@ -3,6 +3,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import LandingPage from "./pages/LandingPage";
 import Home from "./pages/Home";
 import Automation from "./pages/Automation";
 import Agents from "./pages/Agents";
@@ -21,7 +22,8 @@ import NotFound from "./pages/NotFound";
 function Router() {
   return (
     <Switch>
-      <Route path={"/"} component={Home} />
+      <Route path={"/"} component={LandingPage} />
+      <Route path={"/dashboard"} component={Home} />
       <Route path={"/automation"} component={Automation} />
       <Route path={"/agents"} component={Agents} />
       <Route path="/agents/new" component={AgentForm} />

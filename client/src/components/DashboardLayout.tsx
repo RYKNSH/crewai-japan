@@ -86,23 +86,71 @@ export default function DashboardLayout({
     };
 
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="flex flex-col items-center gap-8 p-8 max-w-md w-full">
-          <div className="flex flex-col items-center gap-6">
-            <h1 className="text-2xl font-semibold tracking-tight text-center">
-              ログインが必要です
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-background via-background to-accent/20 p-4">
+        <div className="flex flex-col items-center gap-6 p-8 max-w-lg w-full glass-strong rounded-3xl">
+          {/* ロゴ & タイトル */}
+          <div className="flex flex-col items-center gap-3">
+            <div className="h-14 w-14 rounded-2xl gradient-bg flex items-center justify-center shadow-lg">
+              <span className="text-2xl font-bold text-white">C</span>
+            </div>
+            <h1 className="text-2xl font-bold tracking-tight text-center gradient-text">
+              CrewAI Japan
             </h1>
-            <p className="text-sm text-muted-foreground text-center max-w-sm">
-              このダッシュボードにアクセスするには認証が必要です。続けてログインしてください。
+          </div>
+
+          {/* キャッチコピー */}
+          <div className="text-center space-y-2">
+            <p className="text-xl font-semibold text-foreground">
+              面倒な作業、AIチームに任せませんか？
+            </p>
+            <p className="text-sm text-muted-foreground">
+              3ステップでAIチームを編成。コード不要ですぐに始められます。
             </p>
           </div>
+
+          {/* ユースケース */}
+          <div className="w-full space-y-2">
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-background/60 backdrop-blur-sm">
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md">
+                <span className="text-lg">📊</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-sm">競合分析レポート</p>
+                <p className="text-xs text-muted-foreground">ワンクリックで自動生成</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-background/60 backdrop-blur-sm">
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-fuchsia-500 to-pink-600 flex items-center justify-center shadow-md">
+                <span className="text-lg">✍️</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-sm">ブログ・記事作成</p>
+                <p className="text-xs text-muted-foreground">30分の作業が5分に短縮</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-background/60 backdrop-blur-sm">
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center shadow-md">
+                <span className="text-lg">📧</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-sm">カスタマー対応</p>
+                <p className="text-xs text-muted-foreground">24時間自動で問い合わせ対応</p>
+              </div>
+            </div>
+          </div>
+
+          {/* CTAボタン */}
           <Button
             onClick={handleDevLogin}
             size="lg"
-            className="w-full shadow-lg hover:shadow-xl transition-all"
+            className="w-full"
           >
-            ログイン
+            無料で始める 🚀
           </Button>
+
+          <p className="text-xs text-muted-foreground text-center">
+            クレジットカード不要 • 今すぐ利用開始
+          </p>
         </div>
       </div>
     );
@@ -189,14 +237,14 @@ function DashboardLayoutContent({
             <div className="flex items-center gap-3 px-2 transition-all w-full">
               <button
                 onClick={toggleSidebar}
-                className="h-8 w-8 flex items-center justify-center hover:bg-accent rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
+                className="h-9 w-9 flex items-center justify-center hover:bg-accent rounded-xl transition-all duration-200 hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
                 aria-label="Toggle navigation"
               >
                 <PanelLeft className="h-4 w-4 text-muted-foreground" />
               </button>
               {!isCollapsed ? (
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="font-semibold tracking-tight truncate">
+                  <span className="font-bold tracking-tight truncate gradient-text text-lg">
                     CrewAI Japan
                   </span>
                 </div>

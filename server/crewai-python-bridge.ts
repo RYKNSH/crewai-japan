@@ -6,12 +6,39 @@
 import { spawn } from "child_process";
 import * as path from "path";
 import { fileURLToPath } from "url";
+import { existsSync } from "fs";
 import * as db from "./db";
 import { Agent, Task, Crew } from "../drizzle/schema";
 import { emitCrewStart, emitCrewComplete, emitCrewError, emitLog } from "./_core/websocket";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+/**
+ * Python実行パスを解決（環境変数 → venv → システムPython）
+ */
+function resolvePythonPath(): string {
+  const candidates = [
+    process.env.PYTHON_PATH,
+    path.join(__dirname, "../venv/bin/python"),
+    "/app/venv/bin/python",
+    "/usr/bin/python3",
+    "python3",
+  ].filter(Boolean) as string[];
+
+  console.log("[CrewAI Bridge] Resolving Python path, candidates:", candidates);
+
+  for (const candidate of candidates) {
+    if (candidate.startsWith("/") && existsSync(candidate)) {
+      console.log("[CrewAI Bridge] Found Python at:", candidate);
+      return candidate;
+    }
+  }
+
+  // フォールバック: システムPython
+  console.log("[CrewAI Bridge] Using fallback: python3");
+  return "python3";
+}
 
 export interface PythonCrewAIResult {
   success: boolean;
@@ -38,10 +65,10 @@ async function executePythonCrewAIMock(crewData: {
   console.log("[CrewAI Bridge] Crew:", crewData.name);
   console.log("[CrewAI Bridge] Agents:", crewData.agents.length);
   console.log("[CrewAI Bridge] Tasks:", crewData.tasks.length);
-  
+
   // モック結果を返す
   await new Promise(resolve => setTimeout(resolve, 2000)); // 2秒待機
-  
+
   return {
     success: true,
     result: `クルー「${crewData.name}」の実行が完了しました。\n\n**実行結果:**\n${crewData.tasks.map((t, i) => `${i + 1}. ${t.description}: 完了`).join('\n')}\n\n**最終出力:**\nこれはモック実装によるテスト結果です。本番環境では、実際のCrewAIエンジンが実行されます。`,
@@ -66,40 +93,45 @@ export async function executePythonCrewAI(crewData: {
   // 環境変数でモックモードを切り替え
   // 本番環境でPythonが使用可能になるまで、常にモックを使用
   const useMock = process.env.CREWAI_MOCK_MODE !== "false";
-  
+
   console.log("[CrewAI Bridge] Environment check:");
   console.log("  - CREWAI_MOCK_MODE:", process.env.CREWAI_MOCK_MODE);
   console.log("  - NODE_ENV:", process.env.NODE_ENV);
   console.log("  - useMock:", useMock);
-  
+
   if (useMock) {
     console.log("[CrewAI Bridge] Using MOCK mode");
     return executePythonCrewAIMock(crewData);
   }
-  
+
   console.log("[CrewAI Bridge] Using REAL Python execution");
   // 本番実装（Python実行）
   return new Promise((resolve) => {
     const pythonScript = path.join(__dirname, "../python/crewai_engine.py");
-    const venvPython = path.join(__dirname, "../venv/bin/python");
+    const venvPython = resolvePythonPath();
     console.log("[CrewAI Bridge] Starting Python process:", pythonScript);
     console.log("[CrewAI Bridge] __dirname:", __dirname);
     console.log("[CrewAI Bridge] Python command:", venvPython);
-    
+
+    // 環境変数を設定（venvが存在する場合のみVIRTUAL_ENVを設定）
     const venvPath = path.join(__dirname, "../venv");
-    // 環境変数を完全に制御してvenv環境のみを使用
+    const venvExists = existsSync(venvPath);
     const cleanEnv: NodeJS.ProcessEnv = {
       PYTHONUNBUFFERED: "1",
-      VIRTUAL_ENV: venvPath,
-      PATH: `${path.join(venvPath, "bin")}:/usr/local/bin:/usr/bin:/bin`,
+      ...(venvExists ? { VIRTUAL_ENV: venvPath } : {}),
+      PATH: venvExists
+        ? `${path.join(venvPath, "bin")}:/usr/local/bin:/usr/bin:/bin`
+        : "/usr/local/bin:/usr/bin:/bin",
       PYTHONPATH: "",
       HOME: process.env.HOME,
       USER: process.env.USER,
       LANG: process.env.LANG || "en_US.UTF-8",
+      // OpenAI API keyを引き継ぐ
+      OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     };
-    
+
     console.log("[CrewAI Bridge] Clean environment:", cleanEnv);
-    
+
     const pythonProcess = spawn(venvPython, [pythonScript], {
       env: cleanEnv,
       cwd: path.join(__dirname, ".."),
@@ -122,7 +154,7 @@ export async function executePythonCrewAI(crewData: {
       stderr += data.toString();
       const logMessage = data.toString();
       console.log("[Python CrewAI]", logMessage);
-      
+
       // WebSocketでリアルタイムログを送信
       // executionIdは外部スコープから取得する必要があるため、
       // ここではログ出力のみを行う
@@ -239,12 +271,12 @@ export async function executeCrewAI(crewId: number): Promise<{
 
     if (!pythonResult.success) {
       // 実行失敗
-    await db.updateExecution(execution.id, {
-      status: "failed",
-      output: null,
-      error: pythonResult.error,
-      completedAt: new Date(),
-    });
+      await db.updateExecution(execution.id, {
+        status: "failed",
+        output: null,
+        error: pythonResult.error,
+        completedAt: new Date(),
+      });
 
       await db.createTraceLog({
         executionId: execution.id,
