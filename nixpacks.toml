@@ -1,0 +1,14 @@
+# Railway Nixpacks 設定
+# Dockerfile を優先的に使用するよう指定
+
+[phases.setup]
+nixPkgs = ["nodejs_20", "pnpm", "python311", "python311Packages.pip"]
+
+[phases.install]
+cmds = ["pnpm install --frozen-lockfile"]
+
+[phases.build]
+cmds = ["pnpm run build"]
+
+[start]
+cmd = "node dist/index.js"

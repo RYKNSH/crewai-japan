@@ -1,0 +1,15 @@
+{
+    "mcpServers": {
+        "ElevenLabs": {
+            "command": "uvx",
+            "args": [
+                "elevenlabs-mcp"
+            ],
+            "env": {
+                "ELEVENLABS_API_KEY": "${ELEVENLABS_API_KEY}",
+                "ELEVENLABS_MCP_BASE_PATH": "./cm_assets/audio",
+                "ELEVENLABS_MCP_OUTPUT_MODE": "both"
+            }
+        }
+    }
+}
