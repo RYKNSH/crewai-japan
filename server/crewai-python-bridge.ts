@@ -91,16 +91,27 @@ export async function executePythonCrewAI(crewData: {
   tasks: Task[];
 }): Promise<PythonCrewAIResult> {
   // 環境変数でモックモードを切り替え
-  // 本番環境でPythonが使用可能になるまで、常にモックを使用
-  const useMock = process.env.CREWAI_MOCK_MODE !== "false";
+  const mockEnvSetting = process.env.CREWAI_MOCK_MODE !== "false";
+
+  // Python パスを解決
+  const pythonPath = resolvePythonPath();
+  const pythonAvailable = pythonPath !== "python3" || existsSync("/usr/bin/python3");
+
+  // モックモードの判定: 環境変数がtrue、またはPythonが見つからない場合
+  const useMock = mockEnvSetting || !pythonAvailable;
 
   console.log("[CrewAI Bridge] Environment check:");
   console.log("  - CREWAI_MOCK_MODE:", process.env.CREWAI_MOCK_MODE);
   console.log("  - NODE_ENV:", process.env.NODE_ENV);
+  console.log("  - pythonPath:", pythonPath);
+  console.log("  - pythonAvailable:", pythonAvailable);
   console.log("  - useMock:", useMock);
 
   if (useMock) {
     console.log("[CrewAI Bridge] Using MOCK mode");
+    if (!mockEnvSetting && !pythonAvailable) {
+      console.log("[CrewAI Bridge] Reason: Python not available, falling back to mock");
+    }
     return executePythonCrewAIMock(crewData);
   }
 

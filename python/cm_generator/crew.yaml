@@ -1,0 +1,144 @@
+name: cm_asset_generator_crew
+description: CM素材自動生成のためのクルー構成
+
+# ===============================================
+# クルー定義
+# ===============================================
+
+crews:
+  # マスタークルー（オーケストレーター）
+  orchestrator:
+    name: 総合ディレクター
+    agents:
+      - project_manager
+    tasks:
+      - analyze_storyboard
+    process: sequential
+    verbose: true
+
+  # アートクルー
+  art_crew:
+    name: アートチーム
+    agents:
+      - character_designer
+      - background_artist
+      - effect_designer
+    tasks:
+      - generate_protagonist
+      - generate_agent_characters
+      - generate_backgrounds
+      - generate_effects
+    process: sequential
+    verbose: true
+    memory: true
+
+  # アニメーションクルー
+  animation_crew:
+    name: アニメーションチーム
+    agents:
+      - sequence_director
+      - frame_generator
+      - transition_designer
+    tasks:
+      - create_sequence
+      - compose_frames
+      - create_transitions
+    process: sequential
+    verbose: true
+    depends_on:
+      - art_crew
+
+  # オーディオクルー
+  audio_crew:
+    name: オーディオチーム
+    agents:
+      - music_composer
+      - se_designer
+      - voice_director
+    tasks:
+      - generate_bgm
+      - generate_se
+      - generate_voices
+    process: sequential
+    verbose: true
+
+  # タイポグラフィクルー
+  typography_crew:
+    name: タイポグラフィチーム
+    agents:
+      - copywriter
+      - text_animator
+    tasks:
+      - finalize_copy
+      - generate_text_animations
+    process: sequential
+    verbose: true
+
+  # 品質管理クルー
+  qa_crew:
+    name: 品質管理チーム
+    agents:
+      - art_qa
+      - timing_qa
+      - file_organizer
+    tasks:
+      - qa_art
+      - qa_timing
+      - organize_files
+    process: sequential
+    verbose: true
+    depends_on:
+      - art_crew
+      - animation_crew
+      - audio_crew
+      - typography_crew
+
+# ===============================================
+# 実行フロー
+# ===============================================
+execution_flow:
+  # フェーズ1: 解析
+  phase_1:
+    crew: orchestrator
+    description: ストーリーボード解析とタスク分配
+
+  # フェーズ2: 並列生成
+  phase_2:
+    parallel:
+      - art_crew
+      - audio_crew
+      - typography_crew
+    description: アセット生成（並列実行）
+
+  # フェーズ3: 合成
+  phase_3:
+    crew: animation_crew
+    description: シーン合成とトランジション
+
+  # フェーズ4&5: 品質管理と納品
+  phase_4:
+    crew: qa_crew
+    description: 品質検証とファイル整理
+
+# ===============================================
+# 入出力設定
+# ===============================================
+io_config:
+  input_directory: ./input/
+  output_directory: ./cm_assets/
+  
+  input_files:
+    - storyboard.md
+    - direction_spec.md
+  
+  output_structure:
+    - characters/
+    - backgrounds/
+    - effects/
+    - frames/
+    - transitions/
+    - audio/bgm/
+    - audio/se/
+    - audio/voice/
+    - text/
+    - sequences/

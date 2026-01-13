@@ -1,0 +1,308 @@
+name: cm_asset_generator_tasks
+description: CM素材生成のタスク定義
+
+# ===============================================
+# フェーズ1: 解析・計画
+# ===============================================
+analyze_storyboard:
+  description: |
+    ストーリーボードと演出指示書を解析し、必要な素材リストを作成する。
+    
+    [入力]
+    - storyboard.md: シーン構成、セリフ、演出ポイント
+    - direction_spec.md: アニメスタイル、カラーパレット、タイミング
+    
+    [出力]
+    - 必要なキャラクター一覧（ポーズ・表情含む）
+    - 必要な背景一覧（シーン別）
+    - 必要なエフェクト一覧
+    - 必要な音声・音楽一覧
+    - タイムライン概要
+  expected_output: |
+    asset_manifest.json: 全必要素材のリスト（JSONフォーマット）
+  agent: project_manager
+
+# ===============================================
+# フェーズ2A: キャラクター生成
+# ===============================================
+generate_protagonist:
+  description: |
+    主人公のキャラクター素材を生成する。
+    
+    [仕様]
+    - スタイル: モダンカートゥーン（Rubber Hose）
+    - 表情差分: idle, worried, shouting, surprised, happy
+    - 解像度: 2048x2048px
+    - フォーマット: PNG（透明背景）
+    - カラー: 演出指示書のパレットに準拠
+  expected_output: |
+    /characters/protagonist/ フォルダに5種類のPNG
+  agent: character_designer
+  context:
+    - analyze_storyboard
+
+generate_agent_characters:
+  description: |
+    5種類の小人エージェントのキャラクター素材を生成する。
+    
+    [エージェント一覧]
+    1. リサーチャー（青）: 虫眼鏡、本持ち
+    2. ライター（緑）: ペン、ノート持ち
+    3. アナリスト（オレンジ）: ゴーグル、グラフ持ち
+    4. デザイナー（紫）: ベレー帽、パレット持ち
+    5. マネージャー（赤）: ネクタイ、バインダー持ち
+    
+    [各エージェントの表情差分]
+    - idle, working, celebrating
+    
+    [仕様]
+    - 身長: 主人公の手のひらサイズ（2-2.5頭身）
+    - スタイル: 統一されたカートゥーンスタイル
+  expected_output: |
+    /characters/agent_*/ フォルダに各3種類のPNG（計15ファイル）
+  agent: character_designer
+  context:
+    - generate_protagonist
+
+# ===============================================
+# フェーズ2B: 背景生成
+# ===============================================
+generate_backgrounds:
+  description: |
+    9シーン分の背景画像を生成する。
+    
+    [シーン一覧]
+    1. scene1_desk_cluttered: 散らかったデスク（書類山積み）
+    2. scene2_magical_burst: 魔法のエネルギー爆発
+    3. scene3_spawn_zone: エージェント誕生の光空間
+    4. scene4_reading_space: 情報収集の空間
+    5. scene5_team_formation: チーム結成の円陣
+    6. scene6_workspace: 作業中のオフィス空間
+    7. scene7_completion_glow: 完成の光エフェクト背景
+    8. scene8_handover: 引き渡しシーン
+    9. scene9_logo_backdrop: ロゴ用背景
+    
+    [仕様]
+    - 解像度: 1920x1080px（FHD）
+    - カラー: クリーム系グラデーション基調
+  expected_output: |
+    /backgrounds/ フォルダに9種類のPNG
+  agent: background_artist
+  context:
+    - analyze_storyboard
+
+# ===============================================
+# フェーズ2C: エフェクト生成
+# ===============================================
+generate_effects:
+  description: |
+    アニメーション用エフェクト素材を生成する。
+    
+    [エフェクト一覧]
+    1. energy_wave: エネルギー波（同心円、8フレーム）
+    2. pop_smoke: ポップな煙（登場用、6フレーム）
+    3. sparkles: キラキラ（ループ、12フレーム）
+    4. confetti: 紙吹雪（8フレーム）
+    5. progress_bar: プログレスバー（アニメGIF）
+    6. glow_pulse: 光のパルス（4フレーム）
+    
+    [仕様]
+    - 透明背景PNG連番
+    - 解像度: 512x512px～1024x1024px
+  expected_output: |
+    /effects/*/ フォルダにPNG連番
+  agent: effect_designer
+  context:
+    - analyze_storyboard
+
+# ===============================================
+# フェーズ2D: 音楽生成
+# ===============================================
+generate_bgm:
+  description: |
+    CMのBGMを生成する。
+    
+    [楽曲構成]
+    1. intro_somber (0:00-0:03): 重苦しい、マイナー、60BPM
+    2. transition_buildup (0:03-0:07): ドラムロール、転換
+    3. main_upbeat (0:07-0:42): エレクトロポップ、140BPM
+    4. outro_jingle (0:42-0:45): ブランドジングル
+    
+    [仕様]
+    - フォーマット: WAV/MP3
+    - サンプルレート: 48kHz
+  expected_output: |
+    /audio/bgm/ フォルダに4種類の音楽ファイル
+  agent: music_composer
+  context:
+    - analyze_storyboard
+
+# ===============================================
+# フェーズ2E: SE生成
+# ===============================================
+generate_se:
+  description: |
+    効果音を生成・選定する。
+    
+    [SE一覧]
+    1. sigh.wav: ため息
+    2. magic_sparkle.wav: 魔法発動音
+    3. pop_x5.wav: 小人登場音（5連続）
+    4. paper_flip.wav: 紙めくり音
+    5. team_cheer.wav: チームの掛け声
+    6. typing_loop.wav: タイピング音ループ
+    7. fanfare.wav: 完成ファンファーレ
+    8. applause.wav: 拍手
+    9. logo_sound.wav: ロゴジングル
+    
+    [仕様]
+    - フォーマット: WAV
+    - サンプルレート: 48kHz
+  expected_output: |
+    /audio/se/ フォルダに9種類のSEファイル
+  agent: se_designer
+  context:
+    - analyze_storyboard
+
+# ===============================================
+# フェーズ2F: ボイス生成
+# ===============================================
+generate_voices:
+  description: |
+    キャラクターのセリフ音声を生成する。
+    
+    [セリフ一覧]
+    1. protagonist_tired: 「こんなに仕事があるのに、一人じゃ無理だよ...」
+    2. protagonist_shout: 「だれかー！このレポート作って...」
+    3. agents_complete: 「タスク完了しました！」
+    4. protagonist_happy: 「すごい！これで明日のプレゼン完璧だ！」
+    
+    [仕様]
+    - 主人公: 若い男性、やや疲れた声→元気な声
+    - 小人たち: 高めの声、元気
+  expected_output: |
+    /audio/voice/ フォルダに4種類のボイスファイル
+  agent: voice_director
+  context:
+    - analyze_storyboard
+
+# ===============================================
+# フェーズ2G: テキスト
+# ===============================================
+finalize_copy:
+  description: |
+    テロップとキャッチコピーを最終化する。
+    
+    [テキスト一覧]
+    1. tagline: 「CrewAI - 願いを叶える、小さなクルーたち」
+    2. progress_text: 「作業中...」「80%」「COMPLETE!」
+    3. mission_complete: 「Mission Complete!」
+  expected_output: |
+    /text/copy_list.json
+  agent: copywriter
+  context:
+    - analyze_storyboard
+
+generate_text_animations:
+  description: |
+    テキストをアニメーション付きで出力する。
+    
+    [アニメーション]
+    - Bounce In: タグライン
+    - Typewriter: プログレステキスト
+    - Scale Pulse: COMPLETE!
+  expected_output: |
+    /text/animated/ フォルダにGIF/動画
+  agent: text_animator
+  context:
+    - finalize_copy
+
+# ===============================================
+# フェーズ3: シーケンス・合成
+# ===============================================
+create_sequence:
+  description: |
+    タイムライン情報をJSON形式で作成する。
+    各シーンの開始・終了時間、使用素材、トランジションを定義。
+  expected_output: |
+    /sequences/timeline.json
+  agent: sequence_director
+  context:
+    - analyze_storyboard
+    - generate_protagonist
+    - generate_backgrounds
+    - generate_bgm
+
+compose_frames:
+  description: |
+    各シーンのキーフレームを合成する。
+    キャラクター + 背景 + エフェクトのレイヤー合成。
+  expected_output: |
+    /frames/scene_XX/ フォルダにシーンごとの合成画像
+  agent: frame_generator
+  context:
+    - generate_protagonist
+    - generate_agent_characters
+    - generate_backgrounds
+    - generate_effects
+
+create_transitions:
+  description: |
+    シーン間のトランジション素材を作成する。
+  expected_output: |
+    /transitions/ フォルダにトランジション動画/連番
+  agent: transition_designer
+  context:
+    - create_sequence
+
+# ===============================================
+# フェーズ4: 品質管理
+# ===============================================
+qa_art:
+  description: |
+    すべてのアート素材の品質チェックを行う。
+    - カラーパレット準拠
+    - 解像度統一
+    - フォーマット確認
+  expected_output: |
+    qa_art_report.md: 品質レポート（問題があれば再生成指示）
+  agent: art_qa
+  context:
+    - compose_frames
+    - create_transitions
+
+qa_timing:
+  description: |
+    オーディオとビジュアルのタイミング同期を検証する。
+  expected_output: |
+    qa_timing_report.md: タイミング検証レポート
+  agent: timing_qa
+  context:
+    - create_sequence
+    - generate_bgm
+    - generate_se
+
+# ===============================================
+# フェーズ5: 納品
+# ===============================================
+organize_files:
+  description: |
+    最終フォルダ構成を整理し、READMEを生成する。
+    
+    [最終フォルダ構成]
+    cm_assets/
+    ├── README.md
+    ├── characters/
+    ├── backgrounds/
+    ├── effects/
+    ├── frames/
+    ├── transitions/
+    ├── audio/
+    ├── text/
+    └── sequences/
+  expected_output: |
+    整理済みフォルダ + README.md
+  agent: file_organizer
+  context:
+    - qa_art
+    - qa_timing
