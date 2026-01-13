@@ -1,14 +1,22 @@
 # Railway Nixpacks 設定
-# Dockerfile を優先的に使用するよう指定
+# Node.js + Python マルチランタイム環境
 
 [phases.setup]
-nixPkgs = ["nodejs_20", "pnpm", "python311", "python311Packages.pip"]
+nixPkgs = ["nodejs_20", "pnpm", "python311", "python311Packages.pip", "python311Packages.virtualenv"]
 
 [phases.install]
-cmds = ["pnpm install --frozen-lockfile"]
+cmds = [
+  "pnpm install --frozen-lockfile",
+  "python3 -m venv /app/venv",
+  "source /app/venv/bin/activate && pip install --no-cache-dir -r requirements.txt"
+]
 
 [phases.build]
 cmds = ["pnpm run build"]
+
+[variables]
+PYTHON_PATH = "/app/venv/bin/python"
+CREWAI_MOCK_MODE = "false"
 
 [start]
 cmd = "node dist/index.js"
