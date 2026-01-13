@@ -2,13 +2,13 @@
 # Node.js + Python マルチランタイム環境
 
 [phases.setup]
-nixPkgs = ["nodejs_20", "pnpm", "python311", "python311Packages.pip", "python311Packages.virtualenv"]
+nixPkgs = ["nodejs_20", "pnpm", "python311", "python311Packages.pip"]
 
 [phases.install]
 cmds = [
   "pnpm install --frozen-lockfile",
-  "python3 -m venv /app/venv",
-  "source /app/venv/bin/activate && pip install --no-cache-dir -r requirements.txt"
+  "python3.11 -m venv /app/venv",
+  "/app/venv/bin/pip install --no-cache-dir -r requirements.txt"
 ]
 
 [phases.build]
