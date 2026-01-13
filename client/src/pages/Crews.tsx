@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import DashboardLayout from "@/components/DashboardLayout";
+import { PageHeader } from "@/components/PageHeader";
+import { EmptyState } from "@/components/EmptyState";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc";
-import { Plus, Pencil, Trash2, UsersRound, Play } from "lucide-react";
+import { Pencil, Trash2, UsersRound, Play } from "lucide-react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -21,10 +23,10 @@ import {
 export default function Crews() {
   const [, setLocation] = useLocation();
   const [deleteId, setDeleteId] = useState<number | null>(null);
-  
+
   const utils = trpc.useUtils();
   const { data: crews, isLoading } = trpc.crew.list.useQuery();
-  
+
   const deleteMutation = trpc.crew.delete.useMutation({
     onSuccess: () => {
       utils.crew.list.invalidate();
@@ -48,22 +50,18 @@ export default function Crews() {
     <DashboardLayout>
       <div className="space-y-6">
         {/* ヘッダー */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">クルー</h1>
-            <p className="text-muted-foreground mt-2">
-              エージェントとタスクを組み合わせてクルーを編成します
-            </p>
-          </div>
-          <Button onClick={() => setLocation("/crews/new")}>
-            <Plus className="mr-2 h-4 w-4" />
-            新規作成
-          </Button>
-        </div>
+        <PageHeader
+          icon={UsersRound}
+          title="クルー"
+          description="エージェントとタスクを組み合わせてチームを編成"
+          gradient="from-purple-500 to-indigo-600"
+          actionLabel="新規作成"
+          onAction={() => setLocation("/crews/new")}
+        />
 
         {/* クルー一覧 */}
         {isLoading ? (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {[1, 2, 3].map((i) => (
               <Card key={i} className="animate-pulse">
                 <CardHeader>
@@ -80,19 +78,24 @@ export default function Crews() {
             ))}
           </div>
         ) : crews && crews.length > 0 ? (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {crews.map((crew) => (
-              <Card key={crew.id} className="hover:shadow-lg transition-shadow">
+              <Card key={crew.id} className="group relative overflow-hidden">
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-purple-50">
-                        <UsersRound className="h-5 w-5 text-purple-600" />
+                      <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                        <UsersRound className="h-5 w-5 text-white" />
                       </div>
                       <div>
                         <CardTitle className="text-lg">{crew.name}</CardTitle>
                         <CardDescription className="mt-1">
-                          {crew.process === "sequential" ? "順次実行" : "階層実行"}
+                          <span className={`px-2 py-0.5 rounded-full text-xs ${crew.process === "sequential"
+                              ? "bg-blue-500/10 text-blue-600"
+                              : "bg-amber-500/10 text-amber-600"
+                            }`}>
+                            {crew.process === "sequential" ? "順次実行" : "階層実行"}
+                          </span>
                         </CardDescription>
                       </div>
                     </div>
@@ -105,18 +108,18 @@ export default function Crews() {
                       <p className="text-sm line-clamp-2">{crew.description || "説明なし"}</p>
                     </div>
                     <div className="flex gap-2 flex-wrap">
-                      <Badge variant="secondary">
-                        エージェント: {crew.agentIds?.length || 0}
+                      <Badge variant="secondary" className="bg-violet-500/10 text-violet-600">
+                        🤖 エージェント: {crew.agentIds?.length || 0}
                       </Badge>
-                      <Badge variant="secondary">
-                        タスク: {crew.taskIds?.length || 0}
+                      <Badge variant="secondary" className="bg-fuchsia-500/10 text-fuchsia-600">
+                        📋 タスク: {crew.taskIds?.length || 0}
                       </Badge>
                     </div>
                     <div className="flex gap-2 pt-2">
                       <Button
                         variant="default"
                         size="sm"
-                        className="flex-1"
+                        className="flex-1 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700"
                         onClick={() => handleExecute(crew.id)}
                       >
                         <Play className="mr-2 h-3 w-3" />
@@ -145,16 +148,21 @@ export default function Crews() {
           </div>
         ) : (
           <Card>
-            <CardContent className="flex flex-col items-center justify-center py-16">
-              <UsersRound className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">クルーがありません</h3>
-              <p className="text-sm text-muted-foreground mb-4 text-center max-w-md">
-                最初のクルーを作成して、エージェントとタスクを組み合わせたチームを編成しましょう
-              </p>
-              <Button onClick={() => setLocation("/crews/new")}>
-                <Plus className="mr-2 h-4 w-4" />
-                クルーを作成
-              </Button>
+            <CardContent className="p-0">
+              <EmptyState
+                emoji="👥"
+                title="最初のAIチームを編成しよう！"
+                description="エージェントとタスクを組み合わせて、協力して働くAIチームを作りましょう。複数のエージェントが連携して複雑な作業もこなします。"
+                gradient="from-purple-500 to-indigo-600"
+                primaryAction={{
+                  label: "✨ 今すぐ作成",
+                  onClick: () => setLocation("/crews/new"),
+                }}
+                secondaryAction={{
+                  label: "📖 ガイドを見る",
+                  onClick: () => { },
+                }}
+              />
             </CardContent>
           </Card>
         )}
@@ -183,3 +191,4 @@ export default function Crews() {
     </DashboardLayout>
   );
 }
+

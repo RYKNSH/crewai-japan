@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import DashboardLayout from "@/components/DashboardLayout";
+import { PageHeader } from "@/components/PageHeader";
+import { EmptyState } from "@/components/EmptyState";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
-import { Plus, Pencil, Trash2, Users } from "lucide-react";
+import { Pencil, Trash2, Users } from "lucide-react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -20,10 +22,10 @@ import {
 export default function Agents() {
   const [, setLocation] = useLocation();
   const [deleteId, setDeleteId] = useState<number | null>(null);
-  
+
   const utils = trpc.useUtils();
   const { data: agents, isLoading } = trpc.agent.list.useQuery();
-  
+
   const deleteMutation = trpc.agent.delete.useMutation({
     onSuccess: () => {
       utils.agent.list.invalidate();
@@ -43,22 +45,18 @@ export default function Agents() {
     <DashboardLayout>
       <div className="space-y-6">
         {/* ヘッダー */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">エージェント</h1>
-            <p className="text-muted-foreground mt-2">
-              AIエージェントを作成・管理します
-            </p>
-          </div>
-          <Button onClick={() => setLocation("/agents/new")}>
-            <Plus className="mr-2 h-4 w-4" />
-            新規作成
-          </Button>
-        </div>
+        <PageHeader
+          icon={Users}
+          title="エージェント"
+          description="AIチームのメンバーを作成・管理"
+          gradient="from-violet-500 to-purple-600"
+          actionLabel="新規作成"
+          onAction={() => setLocation("/agents/new")}
+        />
 
         {/* エージェント一覧 */}
         {isLoading ? (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {[1, 2, 3].map((i) => (
               <Card key={i} className="animate-pulse">
                 <CardHeader>
@@ -75,14 +73,14 @@ export default function Agents() {
             ))}
           </div>
         ) : agents && agents.length > 0 ? (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {agents.map((agent) => (
-              <Card key={agent.id} className="hover:shadow-lg transition-shadow">
+              <Card key={agent.id} className="group relative overflow-hidden">
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-primary/10">
-                        <Users className="h-5 w-5 text-primary" />
+                      <div className="p-2.5 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                        <Users className="h-5 w-5 text-white" />
                       </div>
                       <div>
                         <CardTitle className="text-lg">{agent.name}</CardTitle>
@@ -103,12 +101,11 @@ export default function Agents() {
                       </p>
                       <p className="text-sm line-clamp-2">{agent.backstory}</p>
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <span>
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className={`px-2 py-1 rounded-full ${agent.allowDelegation ? 'bg-green-500/10 text-green-600' : 'bg-muted text-muted-foreground'}`}>
                         委譲: {agent.allowDelegation ? "有効" : "無効"}
                       </span>
-                      <span>•</span>
-                      <span>
+                      <span className={`px-2 py-1 rounded-full ${agent.verbose ? 'bg-blue-500/10 text-blue-600' : 'bg-muted text-muted-foreground'}`}>
                         詳細モード: {agent.verbose ? "有効" : "無効"}
                       </span>
                     </div>
@@ -138,16 +135,21 @@ export default function Agents() {
           </div>
         ) : (
           <Card>
-            <CardContent className="flex flex-col items-center justify-center py-16">
-              <Users className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">エージェントがありません</h3>
-              <p className="text-sm text-muted-foreground mb-4 text-center max-w-md">
-                最初のエージェントを作成して、マルチエージェントシステムを始めましょう
-              </p>
-              <Button onClick={() => setLocation("/agents/new")}>
-                <Plus className="mr-2 h-4 w-4" />
-                エージェントを作成
-              </Button>
+            <CardContent className="p-0">
+              <EmptyState
+                emoji="🤖"
+                title="最初のAIエージェントを作ろう！"
+                description="わずか3ステップで、あなた専用のAIアシスタントが完成します。役割、目標、バックストーリーを設定して始めましょう。"
+                gradient="from-violet-500 to-purple-600"
+                primaryAction={{
+                  label: "✨ 今すぐ作成",
+                  onClick: () => setLocation("/agents/new"),
+                }}
+                secondaryAction={{
+                  label: "📖 ガイドを見る",
+                  onClick: () => { },
+                }}
+              />
             </CardContent>
           </Card>
         )}
@@ -176,3 +178,4 @@ export default function Agents() {
     </DashboardLayout>
   );
 }
+

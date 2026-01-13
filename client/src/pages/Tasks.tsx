@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import DashboardLayout from "@/components/DashboardLayout";
+import { PageHeader } from "@/components/PageHeader";
+import { EmptyState } from "@/components/EmptyState";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
-import { Plus, Pencil, Trash2, ListTodo } from "lucide-react";
+import { Pencil, Trash2, ListTodo } from "lucide-react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -20,11 +22,11 @@ import {
 export default function Tasks() {
   const [, setLocation] = useLocation();
   const [deleteId, setDeleteId] = useState<number | null>(null);
-  
+
   const utils = trpc.useUtils();
   const { data: tasks, isLoading } = trpc.task.list.useQuery();
   const { data: agents } = trpc.agent.list.useQuery();
-  
+
   const deleteMutation = trpc.task.delete.useMutation({
     onSuccess: () => {
       utils.task.list.invalidate();
@@ -50,22 +52,18 @@ export default function Tasks() {
     <DashboardLayout>
       <div className="space-y-6">
         {/* ヘッダー */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">タスク</h1>
-            <p className="text-muted-foreground mt-2">
-              エージェントが実行するタスクを作成・管理します
-            </p>
-          </div>
-          <Button onClick={() => setLocation("/tasks/new")}>
-            <Plus className="mr-2 h-4 w-4" />
-            新規作成
-          </Button>
-        </div>
+        <PageHeader
+          icon={ListTodo}
+          title="タスク"
+          description="エージェントが実行する作業を定義・管理"
+          gradient="from-fuchsia-500 to-pink-600"
+          actionLabel="新規作成"
+          onAction={() => setLocation("/tasks/new")}
+        />
 
         {/* タスク一覧 */}
         {isLoading ? (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {[1, 2, 3].map((i) => (
               <Card key={i} className="animate-pulse">
                 <CardHeader>
@@ -82,19 +80,21 @@ export default function Tasks() {
             ))}
           </div>
         ) : tasks && tasks.length > 0 ? (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {tasks.map((task) => (
-              <Card key={task.id} className="hover:shadow-lg transition-shadow">
+              <Card key={task.id} className="group relative overflow-hidden">
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-green-50">
-                        <ListTodo className="h-5 w-5 text-green-600" />
+                      <div className="p-2.5 rounded-xl bg-gradient-to-br from-fuchsia-500 to-pink-600 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                        <ListTodo className="h-5 w-5 text-white" />
                       </div>
                       <div>
                         <CardTitle className="text-lg">{task.name}</CardTitle>
                         <CardDescription className="mt-1">
-                          担当: {getAgentName(task.agentId)}
+                          <span className="px-2 py-0.5 rounded-full bg-violet-500/10 text-violet-600 text-xs">
+                            {getAgentName(task.agentId)}
+                          </span>
                         </CardDescription>
                       </div>
                     </div>
@@ -138,16 +138,21 @@ export default function Tasks() {
           </div>
         ) : (
           <Card>
-            <CardContent className="flex flex-col items-center justify-center py-16">
-              <ListTodo className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">タスクがありません</h3>
-              <p className="text-sm text-muted-foreground mb-4 text-center max-w-md">
-                最初のタスクを作成して、エージェントに実行させる作業を定義しましょう
-              </p>
-              <Button onClick={() => setLocation("/tasks/new")}>
-                <Plus className="mr-2 h-4 w-4" />
-                タスクを作成
-              </Button>
+            <CardContent className="p-0">
+              <EmptyState
+                emoji="📋"
+                title="最初のタスクを作成しよう！"
+                description="AIエージェントに何をしてほしいですか？タスクを作成して、エージェントに実行させる作業を定義しましょう。"
+                gradient="from-fuchsia-500 to-pink-600"
+                primaryAction={{
+                  label: "✨ 今すぐ作成",
+                  onClick: () => setLocation("/tasks/new"),
+                }}
+                secondaryAction={{
+                  label: "📖 ガイドを見る",
+                  onClick: () => { },
+                }}
+              />
             </CardContent>
           </Card>
         )}
@@ -176,3 +181,4 @@ export default function Tasks() {
     </DashboardLayout>
   );
 }
+
